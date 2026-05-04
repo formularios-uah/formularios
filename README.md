@@ -2,10 +2,21 @@
 
 Formularios de inscripción con validación, integración HubSpot y Google Sheets.
 
+## Repositorio y deploy
+
+- **Repositorio:** github.com/formularios-uah/formularios
+- **Deploy actual:** formularios-uah.vercel.app
+- **Dominio producción:** formularios.uahurtado.cl (pendiente CNAME con TI)
+
+## URLs activas
+
+- formularios-uah.vercel.app/talleres
+- formularios-uah.vercel.app/admision
+
 ## Estructura
 
 ```
-demo-formularios/
+formularios/
 ├── shared/
 │   ├── styles.css        ← diseño compartido (nunca tocar por formulario)
 │   └── form-engine.js    ← validación + envío (nunca tocar por formulario)
@@ -16,25 +27,6 @@ demo-formularios/
 └── apps-script/
     └── webhook.gs        ← deployar una vez por cada Sheet
 ```
-
-## Setup inicial (una sola vez)
-
-### 1. GitHub + Vercel
-```bash
-git init
-git add .
-git commit -m "init: formularios UAH"
-# Crear repo en github.com → copiar remote
-git remote add origin https://github.com/TU_USUARIO/formularios-uah.git
-git push -u origin main
-```
-Luego en vercel.com → "Add New Project" → importar el repo → Deploy automático.
-
-### 2. IT: cambio de DNS
-Pedirle a TI que creen un registro CNAME:
-- **Host:** `formularios`
-- **Apunta a:** `cname.vercel-dns.com`
-- Resultado: `formularios.uahurtado.cl` funcionará automáticamente.
 
 ---
 
@@ -53,7 +45,7 @@ Pedirle a TI que creen un registro CNAME:
 ### Paso 2: HubSpot
 1. En HubSpot: **Marketing → Formularios → Crear formulario**
 2. Agregar los mismos campos del Google Form de referencia
-3. En **Configuración → Opciones**, copiar el **Portal ID** y el **Form GUID**
+3. Copiar el **Portal ID** y el **Form GUID**
 
 ### Paso 3: Duplicar carpeta
 ```bash
@@ -78,18 +70,27 @@ Vercel despliega automáticamente en ~30 segundos.
 
 ---
 
+## IT: cambio de DNS (una sola vez)
+
+Solicitar un registro CNAME:
+- **Host:** `formularios`
+- **Apunta a:** `cname.vercel-dns.com`
+- **Resultado:** `formularios.uahurtado.cl` funcionará automáticamente
+
+---
+
 ## Resultado en HubSpot
 
 Cada persona que llena un formulario:
-- Se crea o actualiza como **Contacto** en HubSpot
+- Se crea o actualiza como **Contacto** en HubSpot automáticamente
 - El campo `interes` acumula valores (multi-select): ej. `Taller de Pintura; Admisión Derecho`
 - El historial de submissions queda en la ficha del contacto
 
-Aníbal **ya no carga nada manualmente**. Los datos llegan solos.
+El equipo de admisión ya no carga nada manualmente. Los datos llegan solos.
 
 ## Resultado en Google Sheets
 
 Cada envío agrega una fila nueva al Sheet con:
 `Timestamp | Nombre | Apellido | Email | Teléfono | RUT | Formulario | Interés | Campo adicional`
 
-El historial nunca se pisa porque es una fila nueva por cada envío.
+El historial nunca se replica porque es una fila nueva por cada envío.
