@@ -23,10 +23,10 @@ function formatearRUT(rut) {
   return `${cuerpoFmt}-${dv}`;
 }
 
-// ─── Render ───────────────────────────────────────────────────────────────────
+// ─── Render campo ─────────────────────────────────────────────────────────────
 function renderCampo(campo) {
   const required = campo.requerido ? 'required' : '';
-  const reqMark = campo.requerido ? '<span style="color:var(--red)"> *</span>' : '';
+  const reqMark = campo.requerido ? '' : ' <span style="opacity:0.4;font-size:0.65rem">(opcional)</span>';
 
   if (campo.tipo === 'select') {
     const opts = campo.opciones.map(o => `<option value="${o}">${o}</option>`).join('');
@@ -59,11 +59,10 @@ function renderCampo(campo) {
     </div>`;
 }
 
-// ─── Validación de campo individual ──────────────────────────────────────────
+// ─── Validación ───────────────────────────────────────────────────────────────
 function validarCampo(campo, value) {
   if (campo.requerido && !value.trim()) return 'Este campo es obligatorio.';
-  if (!value.trim()) return null; // opcional vacío → ok
-
+  if (!value.trim()) return null;
   if (campo.tipo === 'email') {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Ingresa un correo válido.';
   }
@@ -76,26 +75,51 @@ function validarCampo(campo, value) {
   return null;
 }
 
-// ─── Envío a HubSpot Forms API (no requiere API key) ─────────────────────────
+// ─── Honeypot ─────────────────────────────────────────────────────────────────
+function renderHoneypot() {
+  return `<div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;" aria-hidden="true">
+    <input type="text" name="website" id="hp-website" tabindex="-1" autocomplete="off">
+  </div>`;
+}
+
+// ─── Meta item del evento ─────────────────────────────────────────────────────
+function renderMetaItem(item) {
+  if (item.tipo === 'fecha') {
+    const [dia, mes] = item.valor.split(' ');
+    return `
+      <div class="event-meta-item">
+        <div class="event-meta-dot date">
+          <span class="day">${dia}</span>
+          <span class="month">${mes}</span>
+        </div>
+        <div class="event-meta-text">${item.texto}</div>
+      </div>`;
+  }
+  return `
+    <div class="event-meta-item">
+      <div class="event-meta-dot">
+        <svg width="14" height="14" fill="none" stroke="black" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+      </div>
+      <div class="event-meta-text">${item.texto}</div>
+    </div>`;
+}
+
+// ─── Envío HubSpot ────────────────────────────────────────────────────────────
 async function enviarHubSpot(config, datos) {
   const url = `https://api.hsforms.com/submissions/v3/integration/submit/${config.hubspot.portalId}/${config.hubspot.formGuid}`;
-
   const fields = Object.entries(datos).map(([name, value]) => ({ name, value }));
-
   const payload = {
     fields,
-    context: {
-      pageUri: window.location.href,
-      pageName: config.titulo
-    }
+    context: { pageUri: window.location.href, pageName: config.titulo }
   };
-
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
-
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || `HubSpot error ${res.status}`);
@@ -103,9 +127,8 @@ async function enviarHubSpot(config, datos) {
   return true;
 }
 
-// ─── Envío a Google Apps Script (append row en Sheet) ────────────────────────
+// ─── Envío Sheets ─────────────────────────────────────────────────────────────
 async function enviarSheets(config, datos) {
-  // no-cors: el dato llega al sheet igualmente, solo no podemos leer la respuesta
   await fetch(config.sheets.webhookUrl, {
     method: 'POST',
     mode: 'no-cors',
@@ -115,63 +138,77 @@ async function enviarSheets(config, datos) {
   return true;
 }
 
-// ─── Init principal ───────────────────────────────────────────────────────────
+// ─── Init ─────────────────────────────────────────────────────────────────────
 export function initForm(config) {
   const app = document.getElementById('form-app');
+  const logoPath = config.logoPath || '../shared/assets/img/uah-logo.png';
+  const logoCNA = config.logoCNA || '../shared/assets/img/sello-acreditacion-cna.png';
+
+  const metaHTML = (config.meta || []).map(renderMetaItem).join('');
+  const descHTML = (config.descripcion || []).map(p => `<p>${p}</p>`).join('');
 
   app.innerHTML = `
     <header class="site-header">
       <a href="/" class="logo">
-        <div class="logo-mark">UAH</div>
-        Universidad Alberto Hurtado
+        <img src="${logoPath}" alt="Universidad Alberto Hurtado">
       </a>
-      <nav><a href="/">Volver al inicio</a></nav>
+      <span class="header-tag">${config.headerTag || 'Admisión'}</span>
     </header>
 
-    <main>
-      <div class="form-sidebar">
-        <span class="activity-tag">${config.tag || 'Inscripción'}</span>
-        <h1>${config.titulo.replace(/([A-ZÁÉÍÓÚ][a-záéíóú]+)/, '<em>$1</em>')}</h1>
-        <div class="divider"></div>
-        <p>${config.subtitulo}</p>
+    <div class="page-layout">
+
+      <!-- Imagen del título: área propia en el grid -->
+      <div class="titulo-imagen-block">
+        <img src="${config.tituloImagen}" alt="${config.titulo || ''}" style="width:100%;height:100%;object-fit:cover;display:block;">
       </div>
 
-      <div class="form-card">
-        <div class="form-card-header">
-          <span>Formulario de inscripción</span>
-          <div class="form-step-indicator">
-            <div class="form-step-dot active"></div>
-            <div class="form-step-dot"></div>
-            <div class="form-step-dot"></div>
-          </div>
+      <!-- Columna izquierda: info evento -->
+      <div class="event-col">
+        ${config.descripcionTitulo || descHTML ? `
+        <div class="event-description">
+          ${config.descripcionTitulo ? `<h2>${config.descripcionTitulo}</h2>` : ''}
+          ${descHTML}
+        </div>` : ''}
+        ${metaHTML ? `<div class="event-meta">${metaHTML}</div>` : ''}
+      </div>
+
+      <!-- Columna derecha: formulario -->
+      <div class="form-col">
+        <div class="form-col-header">
+          <h2>Formulario de Inscripción</h2>
+          <p>${config.subtitulo}</p>
         </div>
 
-        <div class="form-body" id="form-body">
+        <div id="form-body">
           <form id="main-form" novalidate>
+            ${renderHoneypot()}
             ${config.campos.map(renderCampo).join('')}
+            ${config.notaLegal ? `<p class="form-legal">* ${config.notaLegal}</p>` : ''}
             <button type="submit" class="btn-submit" id="btn-submit">
               <div class="spinner"></div>
-              <span class="btn-text">Inscribirme</span>
+              <span class="btn-text">${config.botonTexto || 'Inscribirme'}</span>
             </button>
           </form>
         </div>
 
         <div class="success-screen" id="success-screen">
           <div class="success-icon">
-            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <svg width="26" height="26" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
             </svg>
           </div>
           <h2>¡Inscripción enviada!</h2>
-          <p>Hemos recibido tu información. Te contactaremos pronto<br>al correo que nos proporcionaste.</p>
+          <p>Hemos recibido tu información.<br>Te contactaremos pronto al correo indicado.</p>
         </div>
       </div>
 
-      <div></div><!-- columna derecha vacía -->
-    </main>
+    </div>
 
     <footer class="site-footer">
-      © ${new Date().getFullYear()} Universidad Alberto Hurtado · Alameda 1869, Santiago
+      <div class="footer-accreditation">
+        <img src="${logoCNA}" alt="Acreditación CNA">
+      </div>
+      <span class="footer-copy">© ${new Date().getFullYear()} Universidad Alberto Hurtado</span>
     </footer>
   `;
 
@@ -185,7 +222,7 @@ export function initForm(config) {
     });
   }
 
-  // ── Validación en tiempo real al salir del campo ──────────────────────────
+  // ── Validación blur ───────────────────────────────────────────────────────
   config.campos.forEach(campo => {
     const el = document.getElementById(campo.id);
     if (!el) return;
@@ -193,15 +230,9 @@ export function initForm(config) {
       const err = validarCampo(campo, el.value);
       const group = document.getElementById(`group-${campo.id}`);
       const errEl = document.getElementById(`err-${campo.id}`);
-      if (err) {
-        group.classList.add('error');
-        errEl.textContent = err;
-      } else {
-        group.classList.remove('error');
-        errEl.textContent = '';
-      }
+      if (err) { group.classList.add('error'); errEl.textContent = err; }
+      else { group.classList.remove('error'); errEl.textContent = ''; }
     });
-    // Limpiar error al empezar a escribir
     el.addEventListener('input', () => {
       if (document.getElementById(`group-${campo.id}`).classList.contains('error')) {
         const err = validarCampo(campo, el.value);
@@ -217,7 +248,8 @@ export function initForm(config) {
   document.getElementById('main-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Validar todos los campos
+    if (document.getElementById('hp-website').value !== '') return;
+
     let hayErrores = false;
     const datos = {};
 
@@ -227,41 +259,29 @@ export function initForm(config) {
       const err = validarCampo(campo, el.value);
       const group = document.getElementById(`group-${campo.id}`);
       const errEl = document.getElementById(`err-${campo.id}`);
-
-      if (err) {
-        group.classList.add('error');
-        errEl.textContent = err;
-        hayErrores = true;
-      }
+      if (err) { group.classList.add('error'); errEl.textContent = err; hayErrores = true; }
       datos[campo.id] = el.value.trim();
     });
 
-    // Agregar campo de interés para HubSpot multi-select
     if (config.interes) datos['interes'] = config.interes;
-
     if (hayErrores) return;
 
-    // UI loading
     const btn = document.getElementById('btn-submit');
     btn.disabled = true;
     btn.classList.add('loading');
 
     try {
-      // Envío paralelo: HubSpot + Sheets al mismo tiempo
       await Promise.all([
         enviarHubSpot(config, datos),
         enviarSheets(config, datos)
       ]);
-
-      // Éxito
       document.getElementById('form-body').style.display = 'none';
       document.getElementById('success-screen').classList.add('visible');
-
     } catch (err) {
       console.error('Error al enviar:', err);
       btn.disabled = false;
       btn.classList.remove('loading');
-      alert('Hubo un problema al enviar el formulario. Por favor intenta nuevamente.');
+      alert('Hubo un problema al enviar. Por favor intenta nuevamente.');
     }
   });
 }

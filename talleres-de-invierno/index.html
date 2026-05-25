@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admisión UAH 2025 · Inscripción</title>
+    <title>Talleres UAH · Inscripción</title>
     <link rel="stylesheet" href="../shared/styles.css" />
   </head>
   <body>
@@ -14,46 +14,43 @@
 
       const config = {
         // ── Encabezado ──────────────────────────────────────────────────────
-        headerTag: "Admisión / 27",
-        eyebrow: "UAH Abierta",
-        tituloLabel: "Ensayo",
-        tituloGrande: "PAES",
+        tituloImagen: "../talleres-de-invierno/assets/img/main-image.jpeg",
 
         // ── Info evento ─────────────────────────────────────────────────────
-        descripcionTitulo: "¡Da un paso firme hacia tu futuro!",
+        descripcionTitulo: "Talleres de invierno - 8 de agosto",
         descripcion: [
-          "A veces el futuro no empieza con una decisión, sino con una experiencia: el Ensayo PAES UAH puede ser el primer paso hacia lo que quieres llegar a ser.",
-          "Pon a prueba tus conocimientos en condiciones reales a través de una experiencia presencial y gratuita para estudiantes de 4.° Medio que simula la prueba oficial, en el mismo campus donde podrías comenzar tu vida universitaria.",
+          "Talleres vocacionales, stands informativos y tour patrimonial desde las 09:00 hrs.",
+          "Un espacio donde vivirás la experiencia universitaria UAH y la conexión con la comunidad.",
+          "Te invitamos a participar de los talleres que se impartirán, pensados para responder tus inquietudes.",
         ],
         meta: [
           {
             tipo: "fecha",
-            valor: "30 MAY",
-            texto: "10:00 horas comienza el ensayo",
+            valor: "08 AGO",
+            texto: "09:00 horas — inicio de actividades",
           },
           {
             tipo: "ubicacion",
-            texto:
-              "Av. Alameda Libertador Bernardo O'Higgins 1825, Santiago, Región Metropolitana",
+            texto: "Av. Alameda Libertador Bernardo O'Higgins 1825, Santiago",
           },
         ],
 
         // ── Formulario ──────────────────────────────────────────────────────
         subtitulo:
-          "Rellena tus datos, prepárate con sentido, reduce la ansiedad y vive la experiencia UAH antes de la PAES.",
+          "Rellena tus datos, prepárate con sentido, reduce la ansiedad y vive la experiencia UAH.",
         botonTexto: "Inscribirme",
         notaLegal:
-          "Tus datos serán utilizados exclusivamente para el proceso de inscripción al Ensayo PAES UAH.",
+          "Tus datos serán utilizados exclusivamente para el proceso de inscripción.",
 
         hubspot: {
           portalId: "51242713",
-          formGuid: "239ef8a1-a8dd-4ac1-a04a-252f2f53149f",
+          formGuid: "7060729a-af75-41ef-af87-301948c11def",
         },
         sheets: {
           webhookUrl:
-            "https://script.google.com/macros/s/AKfycbyNfGHsR__c_IuZ9dgZimMooe-xX3L0EpVDHtz8hPoidBx-mxCfkkmqRc4EvUSVCjIJIA/exec",
+            "https://script.google.com/macros/s/AKfycbxPvkuygbdoj_zRcAdfvLyl3BcXq8dLfC-kDZzUG_7i_4_6j2fD11Jiq50fpwZp4S1u/exec",
         },
-        interes: "Admisión Pregrado",
+        interes: "Taller UAH",
 
         campos: [
           {
@@ -92,27 +89,17 @@
             placeholder: "12.345.678-9",
           },
           {
-            id: "carrera_interes",
-            label: "Carrera de interés",
+            id: "taller_interes",
+            label: "Taller de interés",
             tipo: "select",
             requerido: true,
             opciones: [
-              "Derecho",
-              "Psicología",
-              "Trabajo Social",
-              "Ingeniería Comercial",
-              "Pedagogía en Historia",
-              "Filosofía",
-              "Periodismo",
-              "Otra",
+              "Taller de Pintura",
+              "Taller de Fotografía",
+              "Taller de Teatro",
+              "Taller de Escritura Creativa",
+              "Taller de Música",
             ],
-          },
-          {
-            id: "anio_egreso",
-            label: "Año de egreso enseñanza media",
-            tipo: "select",
-            requerido: true,
-            opciones: ["2025", "2024", "2023", "2022 o antes"],
           },
         ],
       };

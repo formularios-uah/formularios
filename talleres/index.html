@@ -12,24 +12,47 @@
     <script type="module">
       import { initForm } from "../shared/form-engine.js";
 
-      // ─── CONFIGURACIÓN — edita aquí para cada formulario nuevo ───────────────
       const config = {
-        titulo: "Talleres de extensión UAH",
+        // ── Encabezado ──────────────────────────────────────────────────────
+        headerTag: "Admisión / 27",
+        eyebrow: "UAH Abierta",
+        tituloLabel: "Talleres de",
+        tituloGrande: "Extensión",
+
+        // ── Info evento ─────────────────────────────────────────────────────
+        descripcionTitulo: "¡Únete a nuestra comunidad!",
+        descripcion: [
+          "Participa en nuestros talleres de extensión universitaria, actividades abiertas a toda la comunidad durante el semestre.",
+          "Desarrolla nuevas habilidades, conoce el campus y conecta con estudiantes y docentes de la UAH.",
+        ],
+        meta: [
+          {
+            tipo: "fecha",
+            valor: "30 MAY",
+            texto: "10:00 horas — inicio de actividades",
+          },
+          {
+            tipo: "ubicacion",
+            texto: "Av. Alameda Libertador Bernardo O'Higgins 1825, Santiago",
+          },
+        ],
+
+        // ── Formulario ──────────────────────────────────────────────────────
         subtitulo:
-          "Inscríbete en nuestros talleres de extensión universitaria. Actividades abiertas a la comunidad durante todo el semestre.",
-        tag: "Talleres",
+          "Rellena tus datos, prepárate con sentido, reduce la ansiedad y vive la experiencia UAH.",
+        botonTexto: "Inscribirme",
+        notaLegal:
+          "Tus datos serán utilizados exclusivamente para el proceso de inscripción.",
 
         hubspot: {
-          portalId: "51242713", // ← reemplazar
-          formGuid: "7060729a-af75-41ef-af87-301948c11def", // ← reemplazar
+          portalId: "51242713",
+          formGuid: "7060729a-af75-41ef-af87-301948c11def",
         },
-
         sheets: {
           webhookUrl:
-            "https://script.google.com/macros/s/AKfycbxPvkuygbdoj_zRcAdfvLyl3BcXq8dLfC-kDZzUG_7i_4_6j2fD11Jiq50fpwZp4S1u/exec", // ← reemplazar
+            "https://script.google.com/macros/s/AKfycbxPvkuygbdoj_zRcAdfvLyl3BcXq8dLfC-kDZzUG_7i_4_6j2fD11Jiq50fpwZp4S1u/exec",
         },
-
-        interes: "Taller UAH", // valor que se acumula en el multi-select de HubSpot
+        interes: "Taller UAH",
 
         campos: [
           {
@@ -82,7 +105,6 @@
           },
         ],
       };
-      // ─────────────────────────────────────────────────────────────────────────
 
       initForm(config);
     </script>
