@@ -84,6 +84,7 @@ function renderHoneypot() {
 
 // ─── Meta item del evento ─────────────────────────────────────────────────────
 function renderMetaItem(item) {
+  // Caso 1: Fecha
   if (item.tipo === 'fecha') {
     const [dia, mes] = item.valor.split(' ');
     return `
@@ -95,14 +96,30 @@ function renderMetaItem(item) {
         <div class="event-meta-text">${item.texto}</div>
       </div>`;
   }
+
+  // Caso 2: Ubicación (detecta si hay link, si no, lo muestra como texto)
+  if (item.tipo === 'ubicacion') {
+    return `
+      <div class="event-meta-wrapper">
+        <div class="event-meta-item">
+          <div class="event-meta-dot">
+            <svg width="24" height="24" fill="none" stroke="black" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <div class="event-meta-text">${item.texto}</div>
+        </div>
+        ${item.mapa ? `
+          <div class="map-container">
+            <iframe src="${item.mapa}" frameborder="0" allowfullscreen="" loading="lazy"></iframe>
+          </div>` : ''}
+      </div>`;
+  }
+
+  // Caso por defecto
   return `
     <div class="event-meta-item">
-      <div class="event-meta-dot">
-        <svg width="14" height="14" fill="none" stroke="black" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-      </div>
       <div class="event-meta-text">${item.texto}</div>
     </div>`;
 }
