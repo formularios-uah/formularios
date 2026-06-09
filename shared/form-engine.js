@@ -60,9 +60,11 @@ function renderCampo(campo) {
 }
 
 // ─── Validación ───────────────────────────────────────────────────────────────
+// ─── Validación ───────────────────────────────────────────────────────────────
 function validarCampo(campo, value) {
   if (campo.requerido && !value.trim()) return 'Este campo es obligatorio.';
   if (!value.trim()) return null;
+  
   if (campo.tipo === 'email') {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Ingresa un correo válido.';
   }
@@ -70,7 +72,8 @@ function validarCampo(campo, value) {
     if (!validarRUT(value)) return 'RUT inválido. Verifica el dígito verificador.';
   }
   if (campo.tipo === 'tel') {
-    if (!/^[\d\s\+\-\(\)]{7,15}$/.test(value)) return 'Teléfono inválido.';
+    // Exige exactamente +569 y 8 números sin espacios
+    if (!/^\+569\d{8}$/.test(value)) return 'El teléfono debe tener 8 números después del +569.';
   }
   return null;
 }
@@ -244,7 +247,38 @@ export function initForm(config) {
       try { e.target.setSelectionRange(pos, pos); } catch(_) {}
     });
   }
+// ── TELÉFONO: formateo en tiempo real ─────────────────────────────────────
+  const phoneField = document.getElementById('phone');
+  if (phoneField) {
+    // Al hacer clic, si está vacío, pone el prefijo automáticamente
+    phoneField.addEventListener('focus', e => {
+      if (e.target.value === '') e.target.value = '+569';
+    });
 
+    phoneField.addEventListener('input', e => {
+      let val = e.target.value;
+      
+      // Si el usuario borra todo, permitimos que el campo quede vacío
+      if (val === '' || val === '+56' || val === '+5' || val === '+') {
+        e.target.value = '';
+        return;
+      }
+      
+      // Extraemos solo los números de lo que el usuario ingresó
+      let numeros = val.replace(/\D/g, '');
+      
+      // Si el usuario pega un número que ya trae el 569, se lo quitamos para no duplicar
+      if (numeros.startsWith('569')) numeros = numeros.substring(3);
+      else if (numeros.startsWith('56')) numeros = numeros.substring(2);
+      else if (numeros.startsWith('9')) numeros = numeros.substring(1);
+      
+      // Limitamos a exactamente 8 números
+      numeros = numeros.substring(0, 8);
+      
+      // Forzamos el formato final
+      e.target.value = '+569' + numeros;
+    });
+   }
   // ── Validación blur ───────────────────────────────────────────────────────
   config.campos.forEach(campo => {
     const el = document.getElementById(campo.id);
