@@ -127,16 +127,22 @@ function renderMetaItem(item) {
 // ─── Envío HubSpot ────────────────────────────────────────────────────────────
 async function enviarHubSpot(config, datos) {
   const url = `https://api.hsforms.com/submissions/v3/integration/submit/${config.hubspot.portalId}/${config.hubspot.formGuid}`;
-  const fields = Object.entries(datos).map(([name, value]) => ({ name, value }));
+  
+  const datosParaHubSpot = { ...datos };
+  delete datosParaHubSpot['taller_interes']; 
+
+  const fields = Object.entries(datosParaHubSpot).map(([name, value]) => ({ name, value }));
   const payload = {
     fields,
     context: { pageUri: window.location.href, pageName: config.titulo }
   };
+  
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
+  
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || `HubSpot error ${res.status}`);
